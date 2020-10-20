@@ -9,7 +9,7 @@ class VideoScreenController:
 
 class VideoStreamer(QtCore.QObject):
     def __init__(self):
-        self.frame_reader = VideoFrameReader()
+        self.frame_reader = VideoFrameReader(device=0)
 
     def run(self):
         while True:

@@ -2,8 +2,8 @@ import cv2
 
 
 class VideoFrameReader:
-    def __init__(self):
-        self.capture = cv2.VideoCapture(0)
+    def __init__(self, device):
+        self.capture = cv2.VideoCapture(device)
 
     def read(self):
         ret, frame = self.capture.read()
@@ -13,4 +13,3 @@ class VideoFrameReader:
     def release(self):
         if self.capture:
             self.release()
-        self.capture = None
