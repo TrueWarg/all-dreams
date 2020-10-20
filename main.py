@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication
 
 def main():
     app = QApplication(sys.argv)
-    video_screen = VideoScreen()
+    video_screen = VideoScreen("Video")
     video_screen.show()
     sys.exit(app.exec_())
 

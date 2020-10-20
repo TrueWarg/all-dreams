@@ -1,12 +1,16 @@
-class VideoStreamer:
+import cv2
+
+
+class VideoFrameReader:
     def __init__(self):
-        pass
+        self.capture = cv2.VideoCapture(0)
 
-    def stream(self):
-        pass
+    def read(self):
+        ret, frame = self.capture.read()
+        if ret:
+            return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    def run(self):
-        pass
-
-    def stop(self):
-        pass
+    def release(self):
+        if self.capture:
+            self.release()
+        self.capture = None
