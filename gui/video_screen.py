@@ -1,4 +1,7 @@
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
+
 from gui.video_screen_controller import VideoScreenController
 
 
@@ -13,20 +16,24 @@ class VideoScreen(QtWidgets.QWidget):
         available_geometry = QtWidgets.QDesktopWidget().availableGeometry()
         screen_center = available_geometry.center()
 
-        width = available_geometry.width() // 2
-        height = available_geometry.height() // 1.5
+        self.width = available_geometry.width() // 2
+        self.height = available_geometry.height() // 1.5
 
-        x = screen_center.x() - width // 2
-        y = screen_center.y() - height // 2
+        x = screen_center.x() - self.width // 2
+        y = screen_center.y() - self.height // 2
 
-        self.setGeometry(x, y, width, height)
+        self.setGeometry(x, y, self.width, self.height)
+        self.image = QtWidgets.QLabel(self)
+        self.image.resize(self.width, self.height)
 
     def _create_controller(self):
         self._controller = VideoScreenController()
-        self._controller.read_frame.connect(self._on_frame_read)
+        self._controller.images.connect(self._on_image_received)
 
-    def _on_frame_read(self, frame):
-        print(frame)
+    def _on_image_received(self, image):
+        scaled = image.scaled(self.width, self.height, Qt.KeepAspectRatio)
+        pix_map = QPixmap.fromImage(scaled)
+        self.image.setPixmap(pix_map)
 
     def closeEvent(self, event):
         self._controller.clear_resources()
