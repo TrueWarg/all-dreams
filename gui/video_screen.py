@@ -27,3 +27,7 @@ class VideoScreen(QtWidgets.QWidget):
 
     def _on_frame_read(self, frame):
         print(frame)
+
+    def closeEvent(self, event):
+        self._controller.clear_resources()
+        event.accept()

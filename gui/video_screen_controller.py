@@ -20,6 +20,9 @@ class VideoScreenController(QtCore.QObject):
     def _on_frame_read(self, frame):
         self.read_frame.emit(frame)
 
+    def clear_resources(self):
+        self._thread.stop()
+
 
 class VideoStreamer(QtCore.QObject):
     read_frame = QtCore.pyqtSignal(object)
