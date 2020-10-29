@@ -4,6 +4,7 @@ from gui.mappers import rgb_image_to_qt
 from sensor.video import VideoFrameReader
 from model.edge_based_detector import EdgeBasedDetector, Config
 import cv2
+import numpy as np
 
 
 class VideoScreenController(QtCore.QObject):
@@ -12,7 +13,13 @@ class VideoScreenController(QtCore.QObject):
     def __init__(self):
         super().__init__()
         self._create_and_start_streamer()
-        config = Config(blur_kernel=(3, 3), binary_threshold=150, canny_threshold1=80, canny_threshold2=230)
+        config = Config(
+            blur_kernel=(3, 3),
+            binary_threshold=150,
+            canny_threshold1=80,
+            canny_threshold2=230,
+            min_object_area_px=2000
+        )
         self._detector = EdgeBasedDetector(config)
 
     def _create_and_start_streamer(self):
@@ -24,9 +31,12 @@ class VideoScreenController(QtCore.QObject):
         self._thread.start()
 
     def _on_frame_received(self, frame):
-        # todo remove temporary using row contours
-        contours, hierarchy = self._detector.detect(frame)
-        frame = cv2.drawContours(frame, contours, -1, (0, 120, 255), 2, cv2.LINE_AA, hierarchy, 1)
+        # todo remove temporary using row rotated rectangles
+        rectangles = self._detector.detect(frame)
+        for rect in rectangles:
+            points = cv2.boxPoints(rect)
+            points = np.int0(points)
+            frame = cv2.drawContours(frame, [points], 0, (0, 0, 255), 2)
         self.images.emit(rgb_image_to_qt(frame))
 
     def clear_resources(self):
