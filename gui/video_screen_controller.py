@@ -18,7 +18,8 @@ class VideoScreenController(QtCore.QObject):
             binary_threshold=150,
             canny_threshold1=80,
             canny_threshold2=230,
-            min_object_area_px=2000
+            min_dice_side_area_px=2000,
+            dice_side_padding_px=10
         )
         self._detector = EdgeBasedDetector(config)
 

@@ -38,10 +38,19 @@ class EdgeBasedDetector:
             center = rect[0]
             sizes = rect[1]
             area = sizes[0] * sizes[1]
-            if area > self.config.min_object_area_px and _center_is_contained(center, rectangles):
+            if area > self.config.min_dice_side_area_px and _center_is_contained(center, rectangles):
                 rectangles.append(rect)
 
         return rectangles
+
+    def _calc_score(self, rect, img):
+        center, sizes, angle = rect
+        rotation = cv2.getRotationMatrix2D(center, angle, scale=1)
+        rotated = cv2.warpAffine(img, rotation, (img.shape[0], img.shape[1]))
+        padding = self.config.dice_side_padding_px
+        cropped = cv2.getRectSubPix(rotated, (int(sizes[0]) - padding, int(sizes[1]) - padding), center)
+        _, cropped = cv2.threshold(cropped, 64, 255, cv2.THRESH_BINARY)
+        contours, hierarchy = cv2.findContours(cropped, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 
 @dataclass
@@ -50,4 +59,11 @@ class Config:
     binary_threshold: int
     canny_threshold1: int
     canny_threshold2: int
-    min_object_area_px: int
+    min_dice_side_area_px: int
+    dice_side_padding_px: int
+
+
+@dataclass
+class DiceSide:
+    rectangle: tuple
+    score: int
