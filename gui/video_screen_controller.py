@@ -19,7 +19,8 @@ class VideoScreenController(QtCore.QObject):
             canny_threshold1=80,
             canny_threshold2=230,
             min_dice_side_area_px=2000,
-            dice_side_padding_px=10
+            dice_side_padding_px=10,
+            min_dot_area_px=50
         )
         self._detector = EdgeBasedDetector(config)
 
@@ -33,9 +34,9 @@ class VideoScreenController(QtCore.QObject):
 
     def _on_frame_received(self, frame):
         # todo remove temporary using row rotated rectangles
-        rectangles = self._detector.detect(frame)
-        for rect in rectangles:
-            points = cv2.boxPoints(rect)
+        dice_sides = self._detector.detect(frame)
+        for side in dice_sides:
+            points = cv2.boxPoints(side.rectangle)
             points = np.int0(points)
             frame = cv2.drawContours(frame, [points], 0, (0, 0, 255), 2)
         self.images.emit(rgb_image_to_qt(frame))
