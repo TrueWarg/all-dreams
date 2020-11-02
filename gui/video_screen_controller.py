@@ -13,9 +13,10 @@ class VideoScreenController(QtCore.QObject):
     def __init__(self):
         super().__init__()
         self._create_and_start_streamer()
+        # todo enable change config dynamically
         config = Config(
             blur_kernel=(3, 3),
-            binary_threshold=150,
+            binary_threshold=80,
             canny_threshold1=80,
             canny_threshold2=230,
             min_dice_side_area_px=2000,
@@ -33,7 +34,6 @@ class VideoScreenController(QtCore.QObject):
         self._thread.start()
 
     def _on_frame_received(self, frame):
-        # todo remove temporary using row rotated rectangles
         dice_sides = self._detector.detect(frame)
         for side in dice_sides:
             points = cv2.boxPoints(side.rectangle)

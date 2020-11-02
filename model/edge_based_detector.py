@@ -21,14 +21,15 @@ class EdgeBasedDetector:
 
     # todo remove temporary using row rotated rectangles
     def detect(self, img: np.array):
-        return self._find_counters(img)
+        return self._identify_dice_sides(img)
 
-    def _find_counters(self, img: np.array):
+    def _identify_dice_sides(self, img: np.array):
         # use copy later?
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         img = cv2.blur(img, self.config.blur_kernel)
         _, img = cv2.threshold(img, self.config.binary_threshold, 255, cv2.THRESH_BINARY)
         edges = cv2.Canny(img, self.config.canny_threshold1, self.config.canny_threshold2)
-        contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         rectangles = self._create_rectangles(contours)
         dice_sides = [DiceSide(rect, self._calc_score(rect, edges)) for rect in rectangles]
         return dice_sides
@@ -40,7 +41,7 @@ class EdgeBasedDetector:
             center = rect[0]
             sizes = rect[1]
             area = sizes[0] * sizes[1]
-            if area > self.config.min_dice_side_area_px and _center_is_contained(center, rectangles):
+            if area > self.config.min_dice_side_area_px and not _center_is_contained(center, rectangles):
                 rectangles.append(rect)
 
         return rectangles
@@ -60,7 +61,7 @@ class EdgeBasedDetector:
             center = rect[0]
             sizes = rect[1]
             area = sizes[0] * sizes[1]
-            if area > self.config.min_dot_area_px and _center_is_contained(center, dots):
+            if area > self.config.min_dot_area_px and not _center_is_contained(center, dots):
                 dots.append(rect)
         return len(dots)
 
