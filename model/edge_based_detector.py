@@ -28,7 +28,7 @@ class EdgeBasedDetector:
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         img = cv2.blur(img, self.config.blur_kernel)
         _, img = cv2.threshold(img, self.config.binary_threshold, 255, cv2.THRESH_BINARY)
-        edges = cv2.Canny(img, self.config.canny_threshold1, self.config.canny_threshold2)
+        edges = cv2.Canny(img, self.config.canny_low_threshold, self.config.canny_high_threshold)
         contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         rectangles = self._create_rectangles(contours)
         dice_sides = [DiceSide(rect, self._calc_score(rect, edges)) for rect in rectangles]
@@ -70,8 +70,8 @@ class EdgeBasedDetector:
 class Config:
     blur_kernel: tuple
     binary_threshold: int
-    canny_threshold1: int
-    canny_threshold2: int
+    canny_low_threshold: int
+    canny_high_threshold: int
     min_dice_side_area_px: int
     dice_side_padding_px: int
     min_dot_area_px: int

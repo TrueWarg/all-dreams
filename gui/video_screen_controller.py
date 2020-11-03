@@ -2,9 +2,23 @@ from PyQt5 import QtCore
 
 from gui.mappers import rgb_image_to_qt
 from sensor.video import VideoFrameReader
-from model.edge_based_detector import EdgeBasedDetector, Config
+from model.edge_based_detector import EdgeBasedDetector, Config, DiceSide
 import cv2
 import numpy as np
+import math
+
+
+def _add_score(img, dice_side: DiceSide):
+    center = dice_side.rectangle[0]
+    sizes = dice_side.rectangle[1]
+    score = dice_side.score
+    y_offset = math.sqrt(sizes[0]**2 + sizes[1]**2)/2 + 5
+    org = (int(center[0]), max(int(center[1] - y_offset), 0))
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1
+    color = (0, 0, 255)
+    thickness = 2
+    return cv2.putText(img, str(score), org, font, font_scale, color, thickness, cv2.LINE_AA)
 
 
 class VideoScreenController(QtCore.QObject):
@@ -17,8 +31,8 @@ class VideoScreenController(QtCore.QObject):
         config = Config(
             blur_kernel=(3, 3),
             binary_threshold=80,
-            canny_threshold1=80,
-            canny_threshold2=230,
+            canny_low_threshold=80,
+            canny_high_threshold=230,
             min_dice_side_area_px=2000,
             dice_side_padding_px=10,
             min_dot_area_px=50
@@ -38,7 +52,12 @@ class VideoScreenController(QtCore.QObject):
         for side in dice_sides:
             points = cv2.boxPoints(side.rectangle)
             points = np.int0(points)
-            frame = cv2.drawContours(frame, [points], 0, (0, 0, 255), 2)
+            contours = [points]
+            contour_idx = 0
+            color = (0, 0, 255)
+            thickness = 2
+            frame = cv2.drawContours(frame, contours, contour_idx, color, thickness)
+            frame = _add_score(frame, side)
         self.images.emit(rgb_image_to_qt(frame))
 
     def clear_resources(self):
