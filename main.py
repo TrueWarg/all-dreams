@@ -1,11 +1,11 @@
 import sys
-from gui.video_screen import VideoScreen
+from gui.edge_based_dices_detection_screen import EdgeBasedDicesDetectionScreen
 from PyQt5.QtWidgets import QApplication
 
 
 def main():
     app = QApplication(sys.argv)
-    video_screen = VideoScreen("Video")
+    video_screen = EdgeBasedDicesDetectionScreen("Video")
     video_screen.show()
     sys.exit(app.exec_())
 

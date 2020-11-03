@@ -2,10 +2,10 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 
-from gui.video_screen_controller import VideoScreenController
+from gui.edge_based_dices_detection_controller import EdgeBasedDicesDetectionController
 
 
-class VideoScreen(QtWidgets.QWidget):
+class EdgeBasedDicesDetectionScreen(QtWidgets.QWidget):
     def __init__(self, title: str):
         super().__init__()
         self.setWindowTitle(title)
@@ -27,7 +27,7 @@ class VideoScreen(QtWidgets.QWidget):
         self.image.resize(self.width, self.height)
 
     def _create_controller(self):
-        self._controller = VideoScreenController()
+        self._controller = EdgeBasedDicesDetectionController()
         self._controller.images.connect(self._on_image_received)
 
     def _on_image_received(self, image):

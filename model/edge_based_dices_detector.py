@@ -15,7 +15,7 @@ def _center_is_contained(center, rectangles):
     return False
 
 
-class EdgeBasedDetector:
+class EdgeBasedDicesDetector:
     def __init__(self, config):
         self.config = config
 

@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 
 from gui.mappers import rgb_image_to_qt
 from sensor.video import VideoFrameReader
-from model.edge_based_detector import EdgeBasedDetector, Config, DiceSide
+from model.edge_based_dices_detector import EdgeBasedDicesDetector, Config, DiceSide
 import cv2
 import numpy as np
 import math
@@ -21,7 +21,7 @@ def _add_score(img, dice_side: DiceSide):
     return cv2.putText(img, str(score), org, font, font_scale, color, thickness, cv2.LINE_AA)
 
 
-class VideoScreenController(QtCore.QObject):
+class EdgeBasedDicesDetectionController(QtCore.QObject):
     images = QtCore.pyqtSignal(object)
 
     def __init__(self):
@@ -37,7 +37,7 @@ class VideoScreenController(QtCore.QObject):
             dice_side_padding_px=10,
             min_dot_area_px=50
         )
-        self._detector = EdgeBasedDetector(config)
+        self._detector = EdgeBasedDicesDetector(config)
 
     def _create_and_start_streamer(self):
         self._thread = QtCore.QThread()
