@@ -5,8 +5,7 @@ from dataclasses import dataclass
 
 def _center_is_contained(center, rectangles):
     for rect in rectangles:
-        other_center = rect[0]
-        other_sizes = rect[1]
+        other_center, other_sizes = rect[:2]
         left, top = (other_center[0] - other_sizes[0] / 2, other_center[1] - other_sizes[1] / 2)
         right, bottom = (other_center[0] + other_sizes[0] / 2, other_center[1] + other_sizes[1] / 2)
         if left < center[0] < right and top < center[1] < bottom:
@@ -38,8 +37,7 @@ class EdgeBasedDicesDetector:
         rectangles = []
         for contour in contours:
             rect = cv2.minAreaRect(contour)
-            center = rect[0]
-            sizes = rect[1]
+            center, sizes = rect[:2]
             area = sizes[0] * sizes[1]
             if area > self.config.min_dice_side_area_px and not _center_is_contained(center, rectangles):
                 rectangles.append(rect)
@@ -58,8 +56,7 @@ class EdgeBasedDicesDetector:
         dots = []
         for contour in contours:
             rect = cv2.minAreaRect(contour)
-            center = rect[0]
-            sizes = rect[1]
+            center, sizes = rect[:2]
             area = sizes[0] * sizes[1]
             if area > self.config.min_dot_area_px and not _center_is_contained(center, dots):
                 dots.append(rect)
