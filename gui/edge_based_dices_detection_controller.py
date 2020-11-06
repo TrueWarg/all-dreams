@@ -2,17 +2,17 @@ from PyQt5 import QtCore
 
 from gui.mappers import rgb_image_to_qt
 from sensor.video import VideoFrameReader
-from model.edge_based_dices_detector import EdgeBasedDicesDetector, Config, DiceSide
+from model.edge_based_dices_detector import EdgeBasedDicesDetector, Config, DetectedDice
 import cv2
 import numpy as np
 import math
 
 
-def _add_score(img, dice_side: DiceSide):
-    center = dice_side.rectangle[0]
-    sizes = dice_side.rectangle[1]
-    score = dice_side.score
-    y_offset = math.sqrt(sizes[0]**2 + sizes[1]**2)/2 + 5
+def _add_score(img: np.ndarray, dice: DetectedDice) -> np.ndarray:
+    center = dice.rectangle[0]
+    sizes = dice.rectangle[1]
+    score = dice.score
+    y_offset = math.sqrt(sizes[0] ** 2 + sizes[1] ** 2) / 2 + 5
     org = (int(center[0]), max(int(center[1] - y_offset), 0))
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 1
@@ -47,7 +47,7 @@ class EdgeBasedDicesDetectionController(QtCore.QObject):
         self._thread.started.connect(self._streamer.run)
         self._thread.start()
 
-    def _on_frame_received(self, frame):
+    def _on_frame_received(self, frame: np.ndarray):
         dice_sides = self._detector.detect(frame)
         for side in dice_sides:
             points = cv2.boxPoints(side.rectangle)

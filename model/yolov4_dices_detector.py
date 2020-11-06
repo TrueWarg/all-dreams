@@ -2,13 +2,24 @@ import cv2
 import numpy as np
 from dataclasses import dataclass
 from model.bounding_box import Bbox
+from typing import List, Tuple
+
+
+def _create_box(img_width: int, img_height: int, detection: np.ndarray) -> Bbox:
+    center_x = detection[0] * img_width
+    center_y = detection[1] * img_height
+    width = int(detection[2] * img_width)
+    height = int(detection[3] * img_height)
+    left = int(center_x - width / 2)
+    top = int(center_y - height / 2)
+    return Bbox(left, top, width, height)
 
 
 @dataclass
 class Config:
     confidence_threshold: int
     nms_threshold: int
-    img_size: tuple
+    img_size: Tuple
 
 
 # this version yolo can't detect angle...
@@ -17,16 +28,6 @@ class DetectedDice:
     box: Bbox
     confidence: float
     class_id: int
-
-
-def _create_box(img_width: int, img_height: int, detection) -> Bbox:
-    center_x = detection[0] * img_width
-    center_y = detection[1] * img_height
-    width = int(detection[2] * img_width)
-    height = int(detection[3] * img_height)
-    left = int(center_x - width / 2)
-    top = int(center_y - height / 2)
-    return Bbox(left, top, width, height)
 
 
 class YoloV4DicesDetector:
@@ -41,7 +42,7 @@ class YoloV4DicesDetector:
         self.config = config
         self.net = net
 
-    def detect(self, img: np.array):
+    def detect(self, img: np.array) -> List[DetectedDice]:
         blob = cv2.dnn.blobFromImage(
             img,
             scalefactor=1.0 / 255,
@@ -52,7 +53,7 @@ class YoloV4DicesDetector:
         outputs = self.net.forward(self.net.getUnconnectedOutLayersNames())
         return self._post_process(img, outputs)
 
-    def _post_process(self, img: np.ndarray, outputs) -> list[DetectedDice]:
+    def _post_process(self, img: np.ndarray, outputs: List[np.ndarray]) -> List[DetectedDice]:
         img_width, img_height = img.shape[:2]
         boxes = []
         confidences = []
@@ -72,4 +73,5 @@ class YoloV4DicesDetector:
             self.config.confidence_threshold,
             self.config.nms_threshold
         )
-        return [DetectedDice(boxes[i], confidences[i], class_ids[i]) for i in indices]
+        dices = [DetectedDice(boxes[i], confidences[i], class_ids[i]) for i in indices]
+        return dices

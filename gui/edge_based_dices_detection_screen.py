@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 
 from gui.edge_based_dices_detection_controller import EdgeBasedDicesDetectionController
+import numpy as np
 
 
 class EdgeBasedDicesDetectionScreen(QtWidgets.QWidget):
@@ -50,7 +51,7 @@ class EdgeBasedDicesDetectionScreen(QtWidgets.QWidget):
         self._controller = EdgeBasedDicesDetectionController()
         self._controller.images.connect(self._on_image_received)
 
-    def _on_image_received(self, image):
+    def _on_image_received(self, image: np.ndarray):
         scaled = image.scaled(self.width // 2, self.height, Qt.KeepAspectRatio)
         pix_map = QPixmap.fromImage(scaled)
         self.image.setPixmap(pix_map)
