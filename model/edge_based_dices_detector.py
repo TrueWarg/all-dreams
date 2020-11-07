@@ -48,7 +48,7 @@ class EdgeBasedDicesDetector:
         edges = cv2.Canny(img, self.config.canny_low_threshold, self.config.canny_high_threshold)
         contours, _ = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         rectangles = self._create_rectangles(contours)
-        dices = [DetectedDice(rect, self._calc_score(rect, edges)) for rect in rectangles]
+        dices = [DetectedDice(rect, self._identify_dice_score(rect, edges)) for rect in rectangles]
         return dices
 
     def _create_rectangles(self, contours: List[np.ndarray]) -> List[Tuple]:
@@ -62,7 +62,7 @@ class EdgeBasedDicesDetector:
 
         return rectangles
 
-    def _calc_score(self, rect: Tuple, img: np.ndarray) -> int:
+    def _identify_dice_score(self, rect: Tuple, img: np.ndarray) -> int:
         center, sizes, angle = rect
         rotation = cv2.getRotationMatrix2D(center, angle, scale=1)
         rotated = cv2.warpAffine(img, rotation, (img.shape[0], img.shape[1]))

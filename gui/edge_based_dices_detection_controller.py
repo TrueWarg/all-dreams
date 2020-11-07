@@ -1,14 +1,13 @@
 from PyQt5 import QtCore
-
 from gui.mappers import rgb_image_to_qt
-from sensor.video import VideoFrameReader
+from gui.video_streamer import VideoStreamer
 from model.edge_based_dices_detector import EdgeBasedDicesDetector, Config, DetectedDice
 import cv2
 import numpy as np
 import math
 
 
-def _add_score(img: np.ndarray, dice: DetectedDice) -> np.ndarray:
+def _place_class_label(img: np.ndarray, dice: DetectedDice) -> np.ndarray:
     center = dice.rectangle[0]
     sizes = dice.rectangle[1]
     score = dice.score
@@ -48,31 +47,17 @@ class EdgeBasedDicesDetectionController(QtCore.QObject):
         self._thread.start()
 
     def _on_frame_received(self, frame: np.ndarray):
-        dice_sides = self._detector.detect(frame)
-        for side in dice_sides:
-            points = cv2.boxPoints(side.rectangle)
+        dices = self._detector.detect(frame)
+        for dice in dices:
+            points = cv2.boxPoints(dice.rectangle)
             points = np.int0(points)
             contours = [points]
             contour_idx = 0
             color = (0, 0, 255)
             thickness = 2
             frame = cv2.drawContours(frame, contours, contour_idx, color, thickness)
-            frame = _add_score(frame, side)
+            frame = _place_class_label(frame, dice)
         self.images.emit(rgb_image_to_qt(frame))
 
     def clear_resources(self):
         self._thread.stop()
-
-
-class VideoStreamer(QtCore.QObject):
-    frames = QtCore.pyqtSignal(object)
-
-    def __init__(self):
-        super().__init__()
-        self._frame_reader = VideoFrameReader(device=0)
-
-    def run(self):
-        while True:
-            image = self._frame_reader.read()
-            if image is not None:
-                self.frames.emit(image)

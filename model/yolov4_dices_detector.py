@@ -17,8 +17,8 @@ def _create_box(img_width: int, img_height: int, detection: np.ndarray) -> Bbox:
 
 @dataclass
 class Config:
-    confidence_threshold: int
-    nms_threshold: int
+    confidence_threshold: float
+    nms_threshold: float
     img_size: Tuple
 
 
